@@ -42,7 +42,7 @@ namespace Mandelbrot {
     public partial class Form1 : Form {
 
         public static Camera camera;
-        public static int maxIterations = 255;
+        public static int maxIterations = 320;
         public static Color[] palette = new Color[maxIterations];
 
         public Form1() {
@@ -52,7 +52,9 @@ namespace Mandelbrot {
         private void Form1_Shown(object sender, EventArgs e) {
             camera = new Camera(mandelbrotPicture.Width, mandelbrotPicture.Height);
             for (int i = 0; i < maxIterations; i++) {
-                palette[i] = Color.FromArgb(255 * i / maxIterations, (i * 2) % 255, (i * 5 % 255));
+                float a = 0.1f;
+                //palette[i] = Color.FromArgb((int)(Math.Sin(a * i) + 1) * 127, (int)(Math.Sin(a * i + 2.094) + 1) * 127, (int)(Math.Sin(a * i + 4.188) + 1) * 127);
+                palette[i] = Color.FromArgb(i / maxIterations * 255, (i * 2) % 255, (i * 5) % 255);
             }
             palette[maxIterations - 1] = Color.Black;
             drawMandelbrot();

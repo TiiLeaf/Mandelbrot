@@ -43,16 +43,17 @@
             // 
             // mandelbrotPicture
             // 
-            this.mandelbrotPicture.Location = new System.Drawing.Point(102, 38);
+            this.mandelbrotPicture.Location = new System.Drawing.Point(0, 24);
             this.mandelbrotPicture.Margin = new System.Windows.Forms.Padding(0);
             this.mandelbrotPicture.Name = "mandelbrotPicture";
-            this.mandelbrotPicture.Size = new System.Drawing.Size(480, 480);
+            this.mandelbrotPicture.Size = new System.Drawing.Size(512, 518);
             this.mandelbrotPicture.TabIndex = 0;
             this.mandelbrotPicture.TabStop = false;
             // 
             // toolStrip1
             // 
-            this.toolStrip1.BackColor = System.Drawing.SystemColors.ScrollBar;
+            this.toolStrip1.BackColor = System.Drawing.SystemColors.ControlDark;
+            this.toolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton1,
@@ -63,7 +64,8 @@
             this.toolStripButton6});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(688, 25);
+            this.toolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
+            this.toolStrip1.Size = new System.Drawing.Size(511, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -131,7 +133,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(688, 583);
+            this.ClientSize = new System.Drawing.Size(511, 541);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.mandelbrotPicture);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
