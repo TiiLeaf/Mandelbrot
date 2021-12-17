@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Mandelbrot {
     public struct Camera {
         int screenWidth;
@@ -42,18 +44,18 @@ namespace Mandelbrot {
     public partial class Form1 : Form {
 
         public static Camera camera;
-        public static int maxIterations = 320;
+        public static int maxIterations = 100;
         public static Color[] palette = new Color[maxIterations];
+        public int[,] iteratonCounts = new int[0,0];
 
         public Form1() {
             InitializeComponent();
         }
 
         private void Form1_Shown(object sender, EventArgs e) {
-            camera = new Camera(mandelbrotPicture.Width, mandelbrotPicture.Height);
+            camera = new Camera(canvas.Width, canvas.Height);
+            iteratonCounts = new int[canvas.Width, canvas.Height];
             for (int i = 0; i < maxIterations; i++) {
-                float a = 0.1f;
-                //palette[i] = Color.FromArgb((int)(Math.Sin(a * i) + 1) * 127, (int)(Math.Sin(a * i + 2.094) + 1) * 127, (int)(Math.Sin(a * i + 4.188) + 1) * 127);
                 palette[i] = Color.FromArgb(i / maxIterations * 255, (i * 2) % 255, (i * 5) % 255);
             }
             palette[maxIterations - 1] = Color.Black;
@@ -62,10 +64,55 @@ namespace Mandelbrot {
 
         private void drawMandelbrot() {
             camera.calculateAxisScales();
+            iteratonCounts = new int[canvas.Width, canvas.Height];
 
-            Bitmap bmp = new Bitmap(mandelbrotPicture.Width, mandelbrotPicture.Height);
-            for (int y = 0; y < mandelbrotPicture.Height; y++) {
-                for (int x = 0; x < mandelbrotPicture.Width; x++) {
+            Thread[] threads = new Thread[8];
+            for (int i = 0; i < threads.Length; i++) {
+                threads[i] = new Thread(() => {
+                    calculateMandelbrotStrip(0, canvas.Height);
+                });
+                threads[i].Name = "Worker #" + i;
+                threads[i].Start();
+            }
+
+            for (int i = 0; i < threads.Length; i++) {
+                threads[i].Join();
+            }
+
+            Bitmap bmp = new Bitmap(canvas.Width, canvas.Height);
+            for (int y = 0; y < canvas.Height; y++) {
+                for (int x = 0; x < canvas.Width; x++) {
+                    bmp.SetPixel(x, y, palette[iteratonCounts[x, y]]);
+                }
+            }
+            canvas.Image = bmp;
+        }
+
+        public void calculateMandelbrotStrip(int startY, int endY) {
+            for (int y = 0; y < canvas.Height; y++) {
+                for (int x = 0; x < canvas.Width; x++) {
+                    double[] coords = camera.screenToCameraCoords(x, y);
+                    Complex c = new Complex(coords[0], coords[1]); //position in complex plane
+                    Complex z = new Complex(0, 0); //the number to be iterated
+
+                    int i = 0;
+                    while (i < maxIterations && z.magSquared() < 4.0) {
+                        i++;
+                        z.square();
+                        z.add(c);
+                    }
+
+                    iteratonCounts[x,y] = i - 1;
+                }
+            }
+        }
+
+        private void drawMandelbrotSingleThread() {
+            camera.calculateAxisScales();
+            Bitmap bmp = new Bitmap(canvas.Width, canvas.Height);
+
+            for (int y = 0; y < canvas.Height; y++) {
+                for (int x = 0; x < canvas.Width; x++) {
                     double[] coords = camera.screenToCameraCoords(x, y);
                     Complex c = new Complex(coords[0], coords[1]); //position in complex plane
                     Complex z = new Complex(0, 0); //the number to be iterated
@@ -80,7 +127,8 @@ namespace Mandelbrot {
 
                 }
             }
-            mandelbrotPicture.Image = bmp;
+
+            canvas.Image = bmp;
         }
 
         private void toolStripButton1_Click(object sender, EventArgs e) {

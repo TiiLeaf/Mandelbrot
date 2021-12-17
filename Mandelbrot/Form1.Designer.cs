@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.mandelbrotPicture = new System.Windows.Forms.PictureBox();
+            this.canvas = new System.Windows.Forms.PictureBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
@@ -37,18 +37,18 @@
             this.toolStripButton4 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton5 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
-            ((System.ComponentModel.ISupportInitialize)(this.mandelbrotPicture)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.canvas)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // mandelbrotPicture
+            // canvas
             // 
-            this.mandelbrotPicture.Location = new System.Drawing.Point(0, 24);
-            this.mandelbrotPicture.Margin = new System.Windows.Forms.Padding(0);
-            this.mandelbrotPicture.Name = "mandelbrotPicture";
-            this.mandelbrotPicture.Size = new System.Drawing.Size(512, 518);
-            this.mandelbrotPicture.TabIndex = 0;
-            this.mandelbrotPicture.TabStop = false;
+            this.canvas.Location = new System.Drawing.Point(0, 24);
+            this.canvas.Margin = new System.Windows.Forms.Padding(0);
+            this.canvas.Name = "canvas";
+            this.canvas.Size = new System.Drawing.Size(512, 512);
+            this.canvas.TabIndex = 0;
+            this.canvas.TabStop = false;
             // 
             // toolStrip1
             // 
@@ -65,7 +65,7 @@
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.toolStrip1.Size = new System.Drawing.Size(511, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(512, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -133,16 +133,16 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(511, 541);
+            this.ClientSize = new System.Drawing.Size(512, 536);
             this.Controls.Add(this.toolStrip1);
-            this.Controls.Add(this.mandelbrotPicture);
+            this.Controls.Add(this.canvas);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.ShowIcon = false;
             this.Text = "Mandelbrot Explorer";
             this.Shown += new System.EventHandler(this.Form1_Shown);
-            ((System.ComponentModel.ISupportInitialize)(this.mandelbrotPicture)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.canvas)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -152,7 +152,7 @@
 
         #endregion
 
-        private PictureBox mandelbrotPicture;
+        private PictureBox canvas;
         private ToolStrip toolStrip1;
         private ToolStripButton toolStripButton1;
         private ToolStripButton toolStripButton2;
