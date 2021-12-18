@@ -60,32 +60,41 @@ namespace Mandelbrot {
             }
             palette[maxIterations - 1] = Color.Black;
             drawMandelbrot();
+            statusStrip1.SizingGrip = false;
         }
 
         private void drawMandelbrot() {
-            camera.calculateAxisScales();
-            iteratonCounts = new int[canvas.Width, canvas.Height];
+            DateTime startTime = DateTime.Now;
+            if (false) {
+                camera.calculateAxisScales();
 
-            Thread[] threads = new Thread[8];
-            for (int i = 0; i < threads.Length; i++) {
-                threads[i] = new Thread(() => {
-                    calculateMandelbrotStrip(0, canvas.Height);
-                });
-                threads[i].Name = "Worker #" + i;
-                threads[i].Start();
-            }
-
-            for (int i = 0; i < threads.Length; i++) {
-                threads[i].Join();
-            }
-
-            Bitmap bmp = new Bitmap(canvas.Width, canvas.Height);
-            for (int y = 0; y < canvas.Height; y++) {
-                for (int x = 0; x < canvas.Width; x++) {
-                    bmp.SetPixel(x, y, palette[iteratonCounts[x, y]]);
+                Thread[] threads = new Thread[8];
+                for (int i = 0; i < threads.Length; i++) {
+                    threads[i] = new Thread(() => {
+                        calculateMandelbrotStrip(0, canvas.Height);
+                    });
+                    threads[i].Name = "Worker #" + i;
+                    threads[i].Start();
                 }
+
+                for (int i = 0; i < threads.Length; i++) {
+                    threads[i].Join();
+                }
+
+                Bitmap bmp = new Bitmap(canvas.Width, canvas.Height);
+                for (int y = 0; y < canvas.Height; y++) {
+                    for (int x = 0; x < canvas.Width; x++) {
+                        bmp.SetPixel(x, y, palette[iteratonCounts[x, y]]);
+                    }
+                }
+                canvas.Image = bmp;
+            } else { 
+                drawMandelbrotSingleThread();
             }
-            canvas.Image = bmp;
+
+            DateTime endTime = DateTime.Now;
+            TimeSpan elapsed = (endTime - startTime);
+            statusStripTimeLabel.Text = "Render Time: " + Math.Floor(elapsed.TotalMilliseconds) + "ms";
         }
 
         public void calculateMandelbrotStrip(int startY, int endY) {
