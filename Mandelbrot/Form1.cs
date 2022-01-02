@@ -9,7 +9,6 @@ namespace Mandelbrot {
         double[] topLeftCoord = { -2.0, 1.5 };
         double[] bottomRightCoord = { 1.0, -1.5 };
         double zoomScale = 1.0;
-        double[] offset = { 0.0, 0.0 };
 
         public Camera(int _screenWidth, int _screenHeight) {
             screenHeight = _screenHeight;
@@ -17,26 +16,30 @@ namespace Mandelbrot {
         }
 
         public void zoom(double zoomChange) {
-            zoomScale += zoomScale * zoomChange * 0.3;
-            topLeftCoord[0] = -2.0 / zoomScale;
-            topLeftCoord[1] = 1.5 / zoomScale;
-            bottomRightCoord[0] = 1.0 / zoomScale;
-            bottomRightCoord[1] = -1.5 / zoomScale;
+            zoomScale += zoomChange;
+            double zoomAmount = 0.2 * (bottomRightCoord[0] - topLeftCoord[0]) * zoomChange;
+            topLeftCoord[0] += zoomAmount;
+            topLeftCoord[1] -= zoomAmount;
+            bottomRightCoord[0] -= zoomAmount;
+            bottomRightCoord[1] += zoomAmount;
         }
 
         public void pan(double dx, double dy) {
-            offset[0] += dx / zoomScale;
-            offset[1] += dy / zoomScale;
+            topLeftCoord[0] += dx / zoomScale;
+            topLeftCoord[1] += dy / zoomScale;
+            bottomRightCoord[0] += dx / zoomScale;
+            bottomRightCoord[1] += dy / zoomScale;
+
         }
 
         public void calculateAxisScales() {
             xScale = (bottomRightCoord[0] - topLeftCoord[0]) / (double)screenWidth;
             yScale = (bottomRightCoord[1] - topLeftCoord[1]) / (double)screenHeight;
-
         }
 
         public double[] screenToCameraCoords(int x, int y) {
-            double[] result = { x * xScale + topLeftCoord[0] + offset[0], y * yScale + topLeftCoord[1] + offset[1] };
+            //double[] result = { x * xScale + topLeftCoord[0] + offset[0], y * yScale + topLeftCoord[1] + offset[1] };
+            double[] result = { x * xScale + topLeftCoord[0], y * yScale + topLeftCoord[1] };
             return result;
         }
     }
@@ -44,6 +47,7 @@ namespace Mandelbrot {
     public partial class Form1 : Form {
         static int maxIterations = 100;
         static string renderMethod = "Single-threaded";
+        static int threadCount = 1;
 
         int[,] iteratonCounts = new int[0, 0];
         Bitmap[] bitmaps = new Bitmap[16];
@@ -71,31 +75,22 @@ namespace Mandelbrot {
                     drawMandelbrotSingleThread();
                     break;
                 case "Multi-threaded":
-                    drawMandelbrotMultithreaded(8);
-                    break;
-                case "Multi-threaded (16)":
-                    drawMandelbrotMultithreaded(16);
+                    drawMandelbrotMultithreaded();
                     break;
                 case "Bitmap Stitching":
-                    drawMandelbrotMultipleBitmaps(8);
-                    break;
-                case "Bitmap Stitching (16)":
-                    drawMandelbrotMultipleBitmaps(16);
+                    drawMandelbrotMultipleBitmaps();
                     break;
                 case "Doubles Only":
                     drawMandelbrotDoublesOnly();
                     break;
                 case "Multi-threaded Doubles":
-                    drawMandelbrotMultithreadedDoubles(8);
-                    break;
-                case "Multi-threaded Doubles (16)":
-                    drawMandelbrotMultithreadedDoubles(16);
+                    drawMandelbrotMultithreadedDoubles();
                     break;
                 case "Single-threaded Optimized":
                     drawMandelbrotOptimized();
                     break;
                 case "Multi-threaded Optimized":
-                    drawMandelbrotMultithreadedOptimized(8);
+                    drawMandelbrotMultithreadedOptimized();
                     break;
                 default:
                     Debug.WriteLine("Tried to use an unknown rendering method...");
@@ -107,7 +102,35 @@ namespace Mandelbrot {
             renderTimeLabel.Text = "Render Time: " + Math.Floor(elapsed.TotalMilliseconds) + "ms";
         }
 
-        private void drawMandelbrotMultithreadedOptimized(int threadCount) {
+        private void drawMandelbrotReducedCamera() {
+            camera.calculateAxisScales();
+            Bitmap bmp = new Bitmap(canvas.Width, canvas.Height);
+
+            for (int y = 0; y < canvas.Height; y++) {
+                for (int x = 0; x < canvas.Width; x++) {
+                    double[] coords = camera.screenToCameraCoords(x, y); //position in complex plane
+                    double ca = coords[0]; //real (x0)
+                    double cb = coords[1]; //imaginary (y0)
+                    double za = 0; //real (x)
+                    double zb = 0; //imaginary (y)
+                    double za2 = 0; //(x2)
+                    double zb2 = 0; //(y2)
+                    int i = 0;
+                    while ((za2 + zb2) < 4.0 && i < maxIterations) {
+                        i++;
+                        zb = 2 * za * zb + cb;
+                        za = za2 - zb2 + ca;
+                        za2 = za * za;
+                        zb2 = zb * zb;
+                    }
+                    bmp.SetPixel(x, y, palette[i - 1]);
+
+                }
+            }
+            canvas.Image = bmp;
+        }
+
+        private void drawMandelbrotMultithreadedOptimized() {
             camera.calculateAxisScales();
 
             Thread[] threads = new Thread[threadCount];
@@ -187,7 +210,7 @@ namespace Mandelbrot {
             canvas.Image = bmp;
         }
 
-        private void drawMandelbrotMultithreadedDoubles(int threadCount) {
+        private void drawMandelbrotMultithreadedDoubles() {
             camera.calculateAxisScales();
 
             Thread[] threads = new Thread[threadCount];
@@ -271,7 +294,7 @@ namespace Mandelbrot {
             canvas.Image = bmp;
         }
 
-        private void drawMandelbrotMultipleBitmaps(int threadCount) {
+        private void drawMandelbrotMultipleBitmaps() {
             camera.calculateAxisScales();
             Thread[] threads = new Thread[threadCount];
 
@@ -319,7 +342,7 @@ namespace Mandelbrot {
             }
         }
 
-        private void drawMandelbrotMultithreaded(int threadCount) {
+        private void drawMandelbrotMultithreaded() {
             camera.calculateAxisScales();
 
             Thread[] threads = new Thread[threadCount];
@@ -423,6 +446,12 @@ namespace Mandelbrot {
         private void toolStripDropDownButton1_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e) {
             renderMethod = e.ClickedItem.Text;
             toolStripDropDownButton1.Text = e.ClickedItem.Text;
+            drawMandelbrot();
+        }
+
+        private void toolStripDropDownButton2_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e) {
+            threadCount = Int32.Parse(e.ClickedItem.Text);
+            toolStripDropDownButton2.Text = e.ClickedItem.Text;
             drawMandelbrot();
         }
         #endregion
