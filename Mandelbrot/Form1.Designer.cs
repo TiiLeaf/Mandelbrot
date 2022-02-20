@@ -53,6 +53,10 @@
             this.singlethreadedOptimizedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.doublesOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.singlethreadedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.singlethreadedFinalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.multithreadedFinalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.threadpoolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bitmapStitchingThreadpoolToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton2 = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,7 +67,6 @@
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.singlethreadedFinalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.canvas)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
@@ -217,7 +220,10 @@
             this.singlethreadedOptimizedToolStripMenuItem,
             this.doublesOnlyToolStripMenuItem,
             this.singlethreadedToolStripMenuItem,
-            this.singlethreadedFinalToolStripMenuItem});
+            this.singlethreadedFinalToolStripMenuItem,
+            this.multithreadedFinalToolStripMenuItem,
+            this.threadpoolToolStripMenuItem,
+            this.bitmapStitchingThreadpoolToolStripMenuItem});
             this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
@@ -279,6 +285,30 @@
             this.singlethreadedToolStripMenuItem.Size = new System.Drawing.Size(260, 22);
             this.singlethreadedToolStripMenuItem.Text = "Single-threaded Naive";
             // 
+            // singlethreadedFinalToolStripMenuItem
+            // 
+            this.singlethreadedFinalToolStripMenuItem.Name = "singlethreadedFinalToolStripMenuItem";
+            this.singlethreadedFinalToolStripMenuItem.Size = new System.Drawing.Size(260, 22);
+            this.singlethreadedFinalToolStripMenuItem.Text = "Single-threaded Final";
+            // 
+            // multithreadedFinalToolStripMenuItem
+            // 
+            this.multithreadedFinalToolStripMenuItem.Name = "multithreadedFinalToolStripMenuItem";
+            this.multithreadedFinalToolStripMenuItem.Size = new System.Drawing.Size(260, 22);
+            this.multithreadedFinalToolStripMenuItem.Text = "Multi-threaded Final";
+            // 
+            // threadpoolToolStripMenuItem
+            // 
+            this.threadpoolToolStripMenuItem.Name = "threadpoolToolStripMenuItem";
+            this.threadpoolToolStripMenuItem.Size = new System.Drawing.Size(260, 22);
+            this.threadpoolToolStripMenuItem.Text = "Threadpool";
+            // 
+            // bitmapStitchingThreadpoolToolStripMenuItem
+            // 
+            this.bitmapStitchingThreadpoolToolStripMenuItem.Name = "bitmapStitchingThreadpoolToolStripMenuItem";
+            this.bitmapStitchingThreadpoolToolStripMenuItem.Size = new System.Drawing.Size(260, 22);
+            this.bitmapStitchingThreadpoolToolStripMenuItem.Text = "Bitmap Stitching Threadpool";
+            // 
             // toolStripDropDownButton2
             // 
             this.toolStripDropDownButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -296,69 +326,63 @@
             this.toolStripDropDownButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton2.Name = "toolStripDropDownButton2";
             this.toolStripDropDownButton2.Size = new System.Drawing.Size(26, 22);
-            this.toolStripDropDownButton2.Text = "4";
+            this.toolStripDropDownButton2.Text = "5";
             this.toolStripDropDownButton2.ToolTipText = "Thread Count";
             this.toolStripDropDownButton2.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStripDropDownButton2_DropDownItemClicked);
             // 
             // toolStripMenuItem8
             // 
             this.toolStripMenuItem8.Name = "toolStripMenuItem8";
-            this.toolStripMenuItem8.Size = new System.Drawing.Size(86, 22);
+            this.toolStripMenuItem8.Size = new System.Drawing.Size(180, 22);
             this.toolStripMenuItem8.Text = "16";
             // 
             // toolStripMenuItem7
             // 
             this.toolStripMenuItem7.Name = "toolStripMenuItem7";
-            this.toolStripMenuItem7.Size = new System.Drawing.Size(86, 22);
+            this.toolStripMenuItem7.Size = new System.Drawing.Size(180, 22);
             this.toolStripMenuItem7.Text = "12";
             // 
             // toolStripMenuItem6
             // 
             this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(86, 22);
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(180, 22);
             this.toolStripMenuItem6.Text = "8";
             // 
             // toolStripMenuItem9
             // 
             this.toolStripMenuItem9.Name = "toolStripMenuItem9";
-            this.toolStripMenuItem9.Size = new System.Drawing.Size(86, 22);
+            this.toolStripMenuItem9.Size = new System.Drawing.Size(180, 22);
             this.toolStripMenuItem9.Text = "7";
             // 
             // toolStripMenuItem5
             // 
             this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(86, 22);
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(180, 22);
             this.toolStripMenuItem5.Text = "6";
             // 
             // toolStripMenuItem10
             // 
             this.toolStripMenuItem10.Name = "toolStripMenuItem10";
-            this.toolStripMenuItem10.Size = new System.Drawing.Size(86, 22);
+            this.toolStripMenuItem10.Size = new System.Drawing.Size(180, 22);
             this.toolStripMenuItem10.Text = "5";
             // 
             // toolStripMenuItem4
             // 
             this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(86, 22);
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(180, 22);
             this.toolStripMenuItem4.Text = "4";
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(86, 22);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(180, 22);
             this.toolStripMenuItem3.Text = "2";
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(86, 22);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(180, 22);
             this.toolStripMenuItem2.Text = "1";
-            // 
-            // singlethreadedFinalToolStripMenuItem
-            // 
-            this.singlethreadedFinalToolStripMenuItem.Name = "singlethreadedFinalToolStripMenuItem";
-            this.singlethreadedFinalToolStripMenuItem.Size = new System.Drawing.Size(260, 22);
-            this.singlethreadedFinalToolStripMenuItem.Text = "Single-threaded Final";
             // 
             // Form1
             // 
@@ -421,5 +445,8 @@
         private ToolStripMenuItem multithreadedReducedCameraToolStripMenuItem;
         private ToolStripMenuItem toolStripMenuItem10;
         private ToolStripMenuItem singlethreadedFinalToolStripMenuItem;
+        private ToolStripMenuItem multithreadedFinalToolStripMenuItem;
+        private ToolStripMenuItem threadpoolToolStripMenuItem;
+        private ToolStripMenuItem bitmapStitchingThreadpoolToolStripMenuItem;
     }
 }

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Threading;
 
 namespace Mandelbrot {
     public struct Camera {
@@ -49,16 +50,42 @@ namespace Mandelbrot {
         }
     }
 
+    public struct ThreadParameters {
+        public int startY;
+        public int endY;
+        public double xScale;
+        public double yScale;
+        public int index = -1;
+
+        public ThreadParameters(int _startY, int _endY, double _xScale, double _yScale) {
+            startY = _startY;
+            endY = _endY;
+            xScale = _xScale;
+            yScale = _yScale;
+        }
+
+        public ThreadParameters(int _startY, int _endY, double _xScale, double _yScale, int _index) {
+            startY = _startY;
+            endY = _endY;
+            xScale = _xScale;
+            yScale = _yScale;
+            index = _index;
+        }
+
+    }
+
     public partial class Form1 : Form {
         static int maxIterations = 100;
         static string renderMethod = "Single-threaded Naive";
-        static int threadCount = 4;
+        static int threadCount = 5;
+        static int completedThreads = 0;
 
         int[,] iteratonCounts = new int[0, 0];
-        Bitmap[] bitmaps = new Bitmap[16];
+        static Bitmap[] bitmaps = new Bitmap[16];
         Bitmap theBitmap;
         static Camera camera;
         static Color[] palette = new Color[maxIterations];
+        Graphics g;
 
         public Form1() {
             InitializeComponent();
@@ -67,12 +94,17 @@ namespace Mandelbrot {
         private void Form1_Shown(object sender, EventArgs e) {
             camera = new Camera(canvas.Width, canvas.Height);
             iteratonCounts = new int[canvas.Width, canvas.Height];
-            for (int i = 0; i < maxIterations; i++) {
-                palette[i] = Color.FromArgb(i / maxIterations * 255, (i * 2) % 255, (i * 5) % 255);
-            }
-            palette[maxIterations - 1] = Color.Black;
-            drawMandelbrot();
             theBitmap = new Bitmap(canvas.Width, canvas.Height);
+            g = canvas.CreateGraphics();
+            for (int i = 0; i < 16; i++) { 
+                bitmaps[i] = new Bitmap(canvas.Width, canvas.Height);
+            }
+            //palette
+            for (int i = 0; i < maxIterations; i++)
+                palette[i] = Color.FromArgb(i / maxIterations * 255, (i * 2) % 255, (i * 5) % 255); 
+            palette[maxIterations - 1] = Color.Black;
+
+            drawMandelbrot();
         }
 
         private void drawMandelbrot() {
@@ -105,20 +137,145 @@ namespace Mandelbrot {
                 case "Multi-threaded Reduced Camera":
                     drawMandelbrotMultithreadedReducedCamera();
                     break;
-                case "Single-threaded Final":
+                case "Single-threaded Final": //SINGLE THREADED (Y), EXPLICIT MULTITHREADED (Y), THREAD POOL (Y), EXPLICIT BITMAP STITCHING (N), THREADPOOL BITMAP STITCHING (Y)
                     drawMandelbrotFinal();
                     break;
                 case "Multi-threaded Final":
                     drawMandelbrotFinalMT();
                     break;
+                case "Threadpool":
+                    drawMandelbrotThreadpool();
+                    break;
+                case "Bitmap Stitching Threadpool":
+                    drawMandelbrotThreadpoolBitmapStitching();
+                    break;
                 default:
-                    Debug.WriteLine("Tried to use an unknown rendering method...");
                     canvas.Image = null;
                     break;
             }
 
             TimeSpan elapsed = (DateTime.Now - startTime);
             renderTimeLabel.Text = "Render Time: " + Math.Floor(elapsed.TotalMilliseconds) + "ms";
+        }
+
+        private void drawMandelbrotThreadpoolBitmapStitching() {
+            double[] scales = camera.calculateAxisScales();
+            double xScale = scales[0];
+            double yScale = scales[1];
+
+            completedThreads = 0;
+            for (int i = 0; i < threadCount; i++) {
+                int startY = (canvas.Height / threadCount) * i;
+                int endY = (canvas.Height / threadCount) * (i + 1);
+                int index = i;
+                WaitCallback wc = new WaitCallback(calculateMandelbrotStripThreadpoolBitmapStitching);
+                ThreadPool.QueueUserWorkItem(wc, new ThreadParameters(startY, endY, xScale, yScale, index));
+            }
+
+            while (completedThreads < threadCount) { /* spin */ }
+
+            for (int i = 0; i < threadCount; i++) {
+                g.DrawImage(bitmaps[i], new Point(0, 0));
+            }
+        }
+
+        private void calculateMandelbrotStripThreadpoolBitmapStitching(object state) {
+            ThreadParameters parameters = (ThreadParameters)state;
+            //position in complex plane
+            double initalX = camera.getTopLeftCoord()[0]; //x0
+            double ca;
+            double cb = camera.screenToCameraCoords(0, parameters.startY)[1]; //y0
+            //iterated variables
+            double za;  //(x) real
+            double zb;  //(y) imaginary
+            double za2; //(x2)
+            double zb2; //(y2)
+            int i;
+
+            for (int y = parameters.startY; y < parameters.endY; y++) {
+                ca = initalX;
+                for (int x = 0; x < canvas.Width; x++) {
+                    za = 0; //real (x)
+                    zb = 0; //imaginary (y)
+                    za2 = 0; //(x2)
+                    zb2 = 0; //(y2)
+                    i = 0;
+
+                    while ((za2 + zb2) < 4.0 && i < maxIterations) {
+                        i++;
+                        zb = 2 * za * zb + cb;
+                        za = za2 - zb2 + ca;
+                        za2 = za * za;
+                        zb2 = zb * zb;
+                    }
+
+                    bitmaps[parameters.index].SetPixel(x, y, palette[i - 1]);
+                    ca += parameters.xScale;
+                }
+                cb += parameters.yScale;
+            }
+            completedThreads += 1;
+        }
+
+        private void drawMandelbrotThreadpool() {
+            double[] scales = camera.calculateAxisScales();
+            double xScale = scales[0];
+            double yScale = scales[1];
+
+            completedThreads = 0;
+            for (int i = 0; i < threadCount; i++) {
+                int startY = (canvas.Height / threadCount) * i;
+                int endY = (canvas.Height / threadCount) * (i + 1);
+                WaitCallback wc = new WaitCallback(calculateMandelbrotStripThreadpool);
+                ThreadPool.QueueUserWorkItem(wc, new ThreadParameters(startY, endY, xScale, yScale));
+            }
+
+            while (completedThreads < threadCount) { /* spin */ }
+
+            for (int y = 0; y < canvas.Height; y++) {
+                for (int x = 0; x < canvas.Width; x++) {
+                    theBitmap.SetPixel(x, y, palette[iteratonCounts[x, y]]);
+                }
+            }
+            canvas.Image = theBitmap;
+        }
+
+        private void calculateMandelbrotStripThreadpool(object state) {
+            ThreadParameters parameters = (ThreadParameters)state;
+            //position in complex plane
+            double initalX = camera.getTopLeftCoord()[0]; //x0
+            double ca;
+            double cb = camera.screenToCameraCoords(0, parameters.startY)[1]; //y0
+            //iterated variables
+            double za;  //(x) real
+            double zb;  //(y) imaginary
+            double za2; //(x2)
+            double zb2; //(y2)
+            int i;
+
+            for (int y = parameters.startY; y < parameters.endY; y++) {
+                ca = initalX;
+                for (int x = 0; x < canvas.Width; x++) {
+                    za = 0; //real (x)
+                    zb = 0; //imaginary (y)
+                    za2 = 0; //(x2)
+                    zb2 = 0; //(y2)
+                    i = 0;
+
+                    while ((za2 + zb2) < 4.0 && i < maxIterations) {
+                        i++;
+                        zb = 2 * za * zb + cb;
+                        za = za2 - zb2 + ca;
+                        za2 = za * za;
+                        zb2 = zb * zb;
+                    }
+
+                    iteratonCounts[x, y] = i - 1;
+                    ca += parameters.xScale;
+                }
+                cb += parameters.yScale;
+            }
+            completedThreads += 1;
         }
 
         private void drawMandelbrotFinal() {
@@ -160,13 +317,69 @@ namespace Mandelbrot {
             canvas.Image = theBitmap;
         }
 
-        private void drawMandelbrotFinalMT() { 
-        
+        private void drawMandelbrotFinalMT() {
+            double[] scales = camera.calculateAxisScales();
+            double xScale = scales[0];
+            double yScale = scales[1];
+
+            Thread[] threads = new Thread[threadCount];
+            for (int i = 0; i < threadCount; i++) {
+                int startY = (canvas.Height / threadCount) * i;
+                int endY = (canvas.Height / threadCount) * (i + 1);
+                threads[i] = new Thread(() => {
+                    calculateMandelbrotStripFinal(startY, endY, xScale, yScale);
+                });
+                threads[i].Start();
+                threads[i].Join();
+            }
+
+            for (int y = 0; y < canvas.Height; y++) {
+                for (int x = 0; x < canvas.Width; x++) {
+                    theBitmap.SetPixel(x, y, palette[iteratonCounts[x, y]]);
+                }
+            }
+            canvas.Image = theBitmap;
+        }
+
+        private void calculateMandelbrotStripFinal(int startY, int endY, double xScale, double yScale) {
+            //position in complex plane
+            double initalX = camera.getTopLeftCoord()[0]; //x0
+            double ca;
+            double cb = camera.screenToCameraCoords(0, startY)[1]; //y0
+            //iterated variables
+            double za;  //(x) real
+            double zb;  //(y) imaginary
+            double za2; //(x2)
+            double zb2; //(y2)
+            int i;
+
+            for (int y = startY; y < endY; y++) {
+                ca = initalX;
+                for (int x = 0; x < canvas.Width; x++) {
+                    za = 0; //real (x)
+                    zb = 0; //imaginary (y)
+                    za2 = 0; //(x2)
+                    zb2 = 0; //(y2)
+                    i = 0;
+
+                    while ((za2 + zb2) < 4.0 && i < maxIterations) {
+                        i++;
+                        zb = 2 * za * zb + cb;
+                        za = za2 - zb2 + ca;
+                        za2 = za * za;
+                        zb2 = zb * zb;
+                    }
+
+                    iteratonCounts[x, y] = i - 1;
+                    ca += xScale;
+                }
+                cb += yScale;
+            }
         }
 
 
         #region BITMAP STITCHING
-        private void drawMandelbrotMultipleBitmaps() {
+            private void drawMandelbrotMultipleBitmaps() {
             camera.calculateAxisScales();
             Thread[] threads = new Thread[threadCount];
 
